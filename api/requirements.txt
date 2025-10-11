@@ -1,0 +1,5 @@
+fastapi==0.104.1
+openai==1.50.0
+pydantic==2.5.0
+httpx>=0.25.0,<0.28.0
+mangum==0.17.0
