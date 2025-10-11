@@ -13,7 +13,6 @@ class handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         try:
-            # Get request body
             content_length = int(self.headers['Content-Length'])
             post_data = self.rfile.read(content_length)
             request_data = json.loads(post_data.decode('utf-8'))
@@ -28,8 +27,6 @@ class handler(BaseHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(json.dumps({'detail': 'Text cannot be empty'}).encode())
                 return
-
-            # Style configurations
             style_prompts = {
                 "general": {
                     "prompt": "You are a helpful writing assistant. Rephrase the following text to improve clarity, readability, and flow while maintaining the original meaning. Make it more polished and well-structured.",
@@ -61,7 +58,6 @@ class handler(BaseHTTPRequestHandler):
                 self.wfile.write(json.dumps({'detail': f'Invalid style. Available: {list(style_prompts.keys())}'}).encode())
                 return
 
-            # Get OpenAI API key
             api_key = os.environ.get('OPENAI_API_KEY')
             if not api_key:
                 self.send_response(500)
@@ -71,7 +67,6 @@ class handler(BaseHTTPRequestHandler):
                 self.wfile.write(json.dumps({'detail': 'OPENAI_API_KEY not configured in Vercel'}).encode())
                 return
 
-            # Call OpenAI
             client = OpenAI(api_key=api_key)
             style_config = style_prompts[style]
 
@@ -87,7 +82,6 @@ class handler(BaseHTTPRequestHandler):
 
             rephrased_text = response.choices[0].message.content
 
-            # Send success response
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
             self.send_header('Access-Control-Allow-Origin', '*')

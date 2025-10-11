@@ -9,7 +9,6 @@ load_dotenv()
 
 app = FastAPI(title="TextRefine AI API", version="1.0.0", docs_url=None, redoc_url=None)
 
-# Configure CORS
 allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173,http://localhost:3000").split(",")
 
 app.add_middleware(

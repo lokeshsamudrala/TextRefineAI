@@ -1,7 +1,6 @@
 export type ParaphrasingStyle = 'general' | 'professional' | 'friendly' | 'creative';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-// For local development, backend doesn't have /api prefix
 const API_ENDPOINT = import.meta.env.VITE_API_URL ? '/api/rephrase' : '/rephrase';
 
 export async function paraphraseText(text: string, style: ParaphrasingStyle): Promise<string> {
