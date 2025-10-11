@@ -16,7 +16,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+# Initialize OpenAI client with error checking
+api_key = os.environ.get("OPENAI_API_KEY")
+if not api_key:
+    raise ValueError("OPENAI_API_KEY environment variable is not set")
+client = OpenAI(api_key=api_key)
 
 class RephraseRequest(BaseModel):
     text: str
@@ -86,8 +90,14 @@ async def rephrase_text(request: RephraseRequest):
 
         return RephraseResponse(rephrased_text=rephrased_text)
 
+    except HTTPException:
+        raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error processing request: {str(e)}")
+        import traceback
+        error_detail = f"Error processing request: {str(e)}"
+        print(f"Error: {error_detail}")
+        print(traceback.format_exc())
+        raise HTTPException(status_code=500, detail=error_detail)
 
 # Handler for Vercel
 handler = Mangum(app)
