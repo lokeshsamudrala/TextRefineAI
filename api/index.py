@@ -10,17 +10,26 @@ app = FastAPI(title="TextRefine AI API", version="1.0.0", docs_url=None, redoc_u
 # Configure CORS - Allow all origins for Vercel deployment
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, you should specify your frontend domain
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Initialize OpenAI client with error checking
-api_key = os.environ.get("OPENAI_API_KEY")
-if not api_key:
-    raise ValueError("OPENAI_API_KEY environment variable is not set")
-client = OpenAI(api_key=api_key)
+# Initialize OpenAI client - lazy initialization to avoid startup failures
+_client = None
+
+def get_openai_client():
+    global _client
+    if _client is None:
+        api_key = os.environ.get("OPENAI_API_KEY")
+        if not api_key:
+            raise HTTPException(
+                status_code=500,
+                detail="OPENAI_API_KEY environment variable is not set in Vercel. Please add it in Settings → Environment Variables."
+            )
+        _client = OpenAI(api_key=api_key)
+    return _client
 
 class RephraseRequest(BaseModel):
     text: str
@@ -56,7 +65,7 @@ def get_style_prompts():
 @app.get("/api")
 @app.get("/api/health")
 async def health_check():
-    return {"status": "healthy"}
+    return {"status": "healthy", "message": "API is running"}
 
 @app.get("/api/styles")
 async def get_styles():
@@ -76,7 +85,10 @@ async def rephrase_text(request: RephraseRequest):
 
         style_config = styles[request.style]
 
-        response = client.chat.completions.create(
+        # Get OpenAI client
+        openai_client = get_openai_client()
+
+        response = openai_client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": style_config["prompt"]},
@@ -99,5 +111,5 @@ async def rephrase_text(request: RephraseRequest):
         print(traceback.format_exc())
         raise HTTPException(status_code=500, detail=error_detail)
 
-# Handler for Vercel
-handler = Mangum(app)
+# Vercel serverless function handler
+handler = Mangum(app, lifespan="off")
