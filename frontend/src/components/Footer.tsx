@@ -16,8 +16,8 @@ export function Footer() {
             <a href="#" className="text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
               Terms
             </a>
-            <a href="#" className="text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-              Contact
+            <a href="https://github.com/lokeshsamudrala" target="_blank" rel="noopener noreferrer" className="text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+              GitHub
             </a>
           </div>
         </div>
